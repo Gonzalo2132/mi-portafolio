@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gonzalo Arreseygor | Interactive Resume Dashboard</title>
     
+    <!-- Favicon (Emoji de computadora) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -25,7 +28,7 @@
                             900: '#134e4a',
                         },
                         accent: {
-                            500: '#8b5cf6', // Purple for AI/Automation
+                            500: '#8b5cf6', 
                         }
                     },
                     fontFamily: {
@@ -37,7 +40,6 @@
     </script>
 
     <style>
-        /* Embedded CSS for strict Chart Container requirements & scrollbars */
         body { background-color: #f8fafc; color: #0f172a; }
         
         ::-webkit-scrollbar { width: 8px; }
@@ -59,39 +61,29 @@
             .chart-container { height: 350px; }
         }
 
-        /* Utility classes for interactive elements */
         .interactive-card { transition: all 0.3s ease; cursor: pointer; }
-        .interactive-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-color: #14b8a6; }
+        .interactive-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); border-color: #14b8a6; }
         
         .timeline-item.active { border-left-color: #14b8a6; background-color: #f0fdfa; }
         .filter-btn.active { background-color: #0f172a; color: white; }
+        
+        /* Modal animations */
+        #project-modal { transition: opacity 0.3s ease; }
+        #project-modal.hidden { opacity: 0; pointer-events: none; }
+        #project-modal.visible { opacity: 1; pointer-events: auto; }
+        #modal-content { transition: transform 0.3s ease; transform: translateY(20px); }
+        #project-modal.visible #modal-content { transform: translateY(0); }
     </style>
 </head>
-<body class="antialiased min-h-screen">
-
-    <!-- Chosen Palette: Warm neutral background (Slate-50), dark slate for text, Teal (Brand) and Purple (Accent) for highlights. -->
-    
-    <!-- Application Structure Plan: 
-         1. Header/Hero: Contact info and executive summary.
-         2. Main Grid (2 columns on desktop):
-            - Left Column: Interactive Radar Chart (Chart.js) showing skill distribution (Dev, Design, AI).
-            - Right Column: Interactive Timeline. Users click a role/study to see details dynamically loaded below it, encouraging exploration without long scrolling.
-         3. Bottom Section: Filterable Portfolio Grid. Users can filter by "Web", "AI", "Software" to see specific projects.
-         Why?: This dashboard structure allows recruiters to instantly grasp his multidisciplinary profile visually (chart), read specifics on demand (timeline), and verify real work (portfolio filters) in a non-linear, engaging way. -->
-         
-    <!-- Visualization & Content Choices: 
-         - Skill Profile -> Goal: Compare -> Method: Radar Chart -> Library: Chart.js -> Justification: Best for showing balance between Programming, Design, and AI.
-         - Experience -> Goal: Organize -> Method: Interactive List (Timeline) -> Justification: Condenses information, reveals details on click. NO SVG used.
-         - Portfolio -> Goal: Filter/Organize -> Method: CSS Grid with JS filtering -> Justification: Standard, intuitive exploration.
-    -->
-    
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. Unicode used for all iconography. -->
+<body class="antialiased min-h-screen relative">
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         <!-- HEADER SECTION -->
-        <header class="bg-white rounded-3xl p-8 shadow-sm border border-slate-200 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-            <div class="flex-1">
+        <header class="bg-white rounded-3xl p-8 shadow-sm border border-slate-200 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-brand-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 opacity-60 pointer-events-none"></div>
+            
+            <div class="flex-1 relative z-10">
                 <div class="inline-flex items-center px-3 py-1 rounded-full bg-brand-50 text-brand-600 text-xs font-bold mb-4 tracking-wider uppercase border border-brand-100">
                     🟢 Disponible para proyectos
                 </div>
@@ -102,8 +94,8 @@
                 </p>
             </div>
             
-            <div class="flex flex-col gap-3 text-sm text-slate-600 bg-slate-50 p-5 rounded-2xl border border-slate-100 w-full md:w-auto">
-                <div class="flex items-center gap-2"><span>📧</span> <a href="mailto:gonzalojesusarreseygor@gmail.com" class="hover:text-brand-600 font-medium">gonzalojesusarreseygor@gmail.com</a></div>
+            <div class="flex flex-col gap-3 text-sm text-slate-600 bg-slate-50 p-5 rounded-2xl border border-slate-100 w-full md:w-auto relative z-10">
+                <div class="flex items-center gap-2"><span>📧</span> <a href="mailto:gonzalojesusarreseygor@gmail.com" class="hover:text-brand-600 font-medium transition-colors">gonzalojesusarreseygor@gmail.com</a></div>
                 <div class="flex items-center gap-2"><span>📱</span> <span>+54 9 3436 474 518</span></div>
                 <div class="flex items-center gap-2"><span>📍</span> <span>Victoria, Entre Ríos, Argentina</span></div>
                 <div class="flex items-center gap-2"><span>🎂</span> <span>21/03/2004</span></div>
@@ -112,22 +104,22 @@
 
         <!-- KPI STATS -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center hover:border-brand-300 transition-colors">
                 <div class="text-3xl mb-2">💻</div>
                 <div class="text-2xl font-bold text-slate-900">+5</div>
                 <div class="text-xs text-slate-500 uppercase tracking-wide font-semibold">Lenguajes de Prog.</div>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center hover:border-brand-300 transition-colors">
                 <div class="text-3xl mb-2">🤖</div>
                 <div class="text-2xl font-bold text-slate-900">IA</div>
                 <div class="text-xs text-slate-500 uppercase tracking-wide font-semibold">Automatización Activa</div>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center hover:border-brand-300 transition-colors">
                 <div class="text-3xl mb-2">🎨</div>
                 <div class="text-2xl font-bold text-slate-900">UI/UX</div>
                 <div class="text-xs text-slate-500 uppercase tracking-wide font-semibold">Diseño Integrado</div>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center hover:border-brand-300 transition-colors">
                 <div class="text-3xl mb-2">🎓</div>
                 <div class="text-2xl font-bold text-slate-900">En curso</div>
                 <div class="text-xs text-slate-500 uppercase tracking-wide font-semibold">Tecnicatura Sup.</div>
@@ -138,20 +130,19 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             
             <!-- LEFT: SKILLS RADAR CHART -->
-            <section class="bg-white rounded-3xl p-8 shadow-sm border border-slate-200 flex flex-col">
-                <div class="mb-6">
+            <section class="bg-white rounded-3xl p-8 shadow-sm border border-slate-200 flex flex-col relative overflow-hidden">
+                <div class="mb-6 relative z-10">
                     <h3 class="text-2xl font-bold text-slate-900 flex items-center gap-2"><span>📊</span> Perfil de Habilidades</h3>
                     <p class="text-sm text-slate-500 mt-1">Análisis multidimensional de competencias técnicas y creativas.</p>
                 </div>
                 
-                <div class="flex-1 flex flex-col justify-center w-full">
-                    <!-- MANDATORY CHART CONTAINER STYLING -->
+                <div class="flex-1 flex flex-col justify-center w-full relative z-10">
                     <div class="chart-container">
                         <canvas id="skillsRadarChart"></canvas>
                     </div>
                 </div>
 
-                <div class="mt-6 grid grid-cols-2 gap-3 text-sm">
+                <div class="mt-6 grid grid-cols-2 gap-3 text-sm relative z-10">
                     <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
                         <span class="font-bold text-slate-700">Desarrollo:</span> PHP, Python, Kotlin, JS, MySQL.
                     </div>
@@ -169,12 +160,10 @@
                 </div>
 
                 <div class="flex flex-col md:flex-row gap-6">
-                    <!-- Timeline List -->
                     <div class="w-full md:w-1/2 space-y-2" id="timeline-list">
                         <!-- Populated by JS -->
                     </div>
 
-                    <!-- Timeline Details Panel -->
                     <div class="w-full md:w-1/2 bg-slate-50 rounded-2xl p-6 border border-slate-100 relative" id="timeline-details">
                         <div class="flex flex-col items-center justify-center h-full text-slate-400 text-center min-h-[200px]">
                             <span class="text-4xl mb-2">👈</span>
@@ -190,25 +179,81 @@
         <section class="bg-white rounded-3xl p-8 shadow-sm border border-slate-200">
             <div class="flex flex-col md:flex-row justify-between items-end mb-8 border-b border-slate-100 pb-6">
                 <div>
-                    <h3 class="text-2xl font-bold text-slate-900 flex items-center gap-2"><span>📁</span> Portafolio de Proyectos</h3>
-                    <p class="text-sm text-slate-500 mt-1">Explora mis desarrollos filtrando por categoría.</p>
+                    <h3 class="text-2xl font-bold text-slate-900 flex items-center gap-2"><span>🚀</span> Aplicaciones y Proyectos</h3>
+                    <p class="text-sm text-slate-500 mt-1">Selecciona un proyecto para ver demos, código e información detallada.</p>
                 </div>
                 
                 <!-- Filters -->
                 <div class="flex gap-2 mt-4 md:mt-0 overflow-x-auto pb-2 md:pb-0" id="portfolio-filters">
-                    <button class="filter-btn active px-4 py-2 rounded-xl text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" data-filter="all">Todos</button>
-                    <button class="filter-btn px-4 py-2 rounded-xl text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" data-filter="web">Desarrollo Web</button>
-                    <button class="filter-btn px-4 py-2 rounded-xl text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" data-filter="ai">Agentes IA</button>
-                    <button class="filter-btn px-4 py-2 rounded-xl text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" data-filter="software">Software Desktop</button>
+                    <button class="filter-btn active px-4 py-2 rounded-xl text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors whitespace-nowrap" data-filter="all">Todos</button>
+                    <button class="filter-btn px-4 py-2 rounded-xl text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors whitespace-nowrap" data-filter="webapp">Web Apps</button>
+                    <button class="filter-btn px-4 py-2 rounded-xl text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors whitespace-nowrap" data-filter="ai">Agentes IA</button>
+                    <button class="filter-btn px-4 py-2 rounded-xl text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors whitespace-nowrap" data-filter="software">Software Desktop</button>
                 </div>
             </div>
 
             <!-- Portfolio Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="portfolio-grid">
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="portfolio-grid">
                 <!-- Populated by JS -->
             </div>
         </section>
 
+    </div>
+
+    <!-- MODAL PARA DETALLES DE PROYECTO (Hidden by default) -->
+    <div id="project-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div id="modal-content" class="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden relative">
+            
+            <!-- Botón Cerrar -->
+            <button id="close-modal" class="absolute top-4 right-4 w-10 h-10 bg-slate-100 text-slate-600 rounded-full flex items-center justify-center hover:bg-slate-200 hover:text-slate-900 transition-colors z-10 text-xl font-bold">
+                ✕
+            </button>
+
+            <!-- Cabecera del Modal -->
+            <div class="bg-slate-50 p-8 border-b border-slate-100 flex items-center gap-6">
+                <div id="modal-icon" class="w-20 h-20 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center text-4xl">
+                    <!-- Icono inyectado -->
+                </div>
+                <div>
+                    <h2 id="modal-title" class="text-3xl font-extrabold text-slate-900 mb-2">Título del Proyecto</h2>
+                    <div id="modal-tags" class="flex flex-wrap gap-2">
+                        <!-- Etiquetas inyectadas -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cuerpo del Modal -->
+            <div class="p-8 overflow-y-auto flex-1">
+                <h3 class="text-lg font-bold text-slate-900 mb-3">Descripción del Proyecto</h3>
+                <p id="modal-description" class="text-slate-600 leading-relaxed mb-8">
+                    Descripción detallada...
+                </p>
+
+                <h3 class="text-lg font-bold text-slate-900 mb-3">Características Principales</h3>
+                <ul id="modal-features" class="list-disc list-inside text-slate-600 space-y-2 mb-8 marker:text-brand-500">
+                    <!-- Features inyectadas -->
+                </ul>
+
+                <!-- SECCIÓN DE CÓDIGO (Nuevo) -->
+                <div id="modal-code-section" class="hidden mb-8 border-t border-slate-100 pt-6">
+                    <h3 class="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2"><span>💻</span> Vistazo al Código</h3>
+                    <p id="modal-code-explanation" class="text-slate-600 mb-4 text-sm leading-relaxed"></p>
+                    <div class="bg-[#0f172a] rounded-xl p-4 overflow-x-auto shadow-inner border border-slate-700">
+                        <pre><code id="modal-code-block" class="text-emerald-400 font-mono text-sm whitespace-pre-wrap"></code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pie del Modal (Botones de acción) -->
+            <div class="bg-slate-50 p-6 border-t border-slate-100 flex gap-4 justify-end">
+                <a id="modal-repo-link" href="#" target="_blank" class="px-6 py-3 rounded-xl font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition-colors flex items-center gap-2 hidden">
+                    <span>💻</span> Ver Repositorio
+                </a>
+                <a id="modal-demo-link" href="#" target="_blank" class="px-6 py-3 rounded-xl font-semibold bg-brand-600 text-white hover:bg-brand-700 transition-colors flex items-center gap-2 shadow-lg shadow-brand-200 hidden">
+                    <span>🌐</span> Visitar App
+                </a>
+            </div>
+        </div>
     </div>
 
     <!-- JAVASCRIPT LOGIC -->
@@ -216,6 +261,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             
             // --- 1. DATA STORAGE ---
+            
+            // Timeline Data
             const timelineData = [
                 {
                     id: 'ai-agents',
@@ -232,7 +279,7 @@
                     period: '2024 - 2026',
                     type: 'Educación',
                     icon: '🎓',
-                    details: 'Formación superior en el Instituto Gaspar Benavento. Adquisición de metodologías ágiles, bases de datos avanzadas, algoritmia y arquitectura de software orientada a la industria moderna.',
+                    details: 'Formación superior en el Instituto Gaspar Benavento. Adquisición de metodologías ágiles, bases de datos avanzadas, algoritmia y arquitectura de software.',
                     tags: ['Ingeniería de Software', 'Bases de Datos', 'POO']
                 },
                 {
@@ -241,7 +288,7 @@
                     period: '2023 - 2024',
                     type: 'Experiencia',
                     icon: '🛍️',
-                    details: 'Creación de una plataforma de ventas online completa como desarrollador Full Stack Freelance. Implementación de carrito de compras, gestión de inventario y panel de administración.',
+                    details: 'Creación de una plataforma de ventas online completa como desarrollador Full Stack Freelance. Implementación de carrito de compras y gestión de inventario.',
                     tags: ['PHP', 'MySQL', 'Diseño Web', 'Gestión']
                 },
                 {
@@ -255,38 +302,63 @@
                 }
             ];
 
+            // PORTFOLIO DATA EXPANDED
             const portfolioData = [
                 {
                     id: 1,
-                    title: 'E-commerce Capibara',
-                    category: 'web',
-                    desc: 'Plataforma web dinámica con catálogo de productos, gestión de stock y base de datos relacional.',
-                    tech: ['PHP', 'MySQL', 'HTML/CSS'],
-                    icon: '🛒'
+                    title: 'E-commerce "Capibara"',
+                    category: 'webapp',
+                    shortDesc: 'Plataforma web dinámica con catálogo de productos y carrito de compras.',
+                    longDesc: 'Diseño y desarrollo completo de una tienda online para venta de indumentaria criolla. El sistema cuenta con un panel administrativo personalizado para gestionar el stock, subir productos, procesar órdenes y administrar clientes.',
+                    features: [
+                        'Panel de administración (CRUD de productos).',
+                        'Integración con pasarela de pagos local.',
+                        'Diseño responsivo optimizado para móviles.',
+                        'Gestión automática de stock.'
+                    ],
+                    tech: ['PHP', 'MySQL', 'JavaScript', 'Bootstrap'],
+                    icon: '🛒',
+                    demoLink: '#', 
+                    repoLink: '#'  
                 },
                 {
                     id: 2,
-                    title: 'Sistema de Agentes para Reservas',
+                    title: 'Asistente IA para Reservas',
                     category: 'ai',
-                    desc: 'Flujo de trabajo automatizado que gestiona reservas deportivas utilizando IA conversacional.',
-                    tech: ['n8n', 'ChatGPT', 'Automatización'],
-                    icon: '🧠'
+                    shortDesc: 'Agente inteligente que gestiona reservas deportivas vía WhatsApp/Web.',
+                    longDesc: 'Implementación de un flujo conversacional automatizado utilizando n8n y la API de ChatGPT. El bot entiende lenguaje natural, consulta disponibilidad en una base de datos en tiempo real y agenda o cancela turnos para canchas deportivas sin intervención humana.',
+                    features: [
+                        'Procesamiento de Lenguaje Natural (NLP).',
+                        'Automatización de flujos con n8n.',
+                        'Conexión con calendario de Google / Base de datos.',
+                        'Soporte 24/7 para clientes.'
+                    ],
+                    tech: ['n8n', 'OpenAI API', 'Node.js', 'Webhooks'],
+                    icon: '🧠',
+                    demoLink: '#',
+                    repoLink: '#'
                 },
                 {
                     id: 3,
-                    title: 'Gestor de Stock iPhone',
+                    title: 'Inventory Manager (Desktop)',
                     category: 'software',
-                    desc: 'Aplicación de escritorio con interfaz gráfica para llevar el control preciso del inventario de dispositivos móviles.',
-                    tech: ['Python', 'Tkinter', 'Bases de Datos'],
-                    icon: '💻'
-                },
-                {
-                    id: 4,
-                    title: 'Estrategia Branding & Marketing',
-                    category: 'web', // grouped in web/design for simplicity
-                    desc: 'Creación de identidad visual corporativa y gestión de campañas para emprendimientos locales.',
-                    tech: ['Canva', 'Marketing Digital', 'Diseño'],
-                    icon: '🎨'
+                    shortDesc: 'Aplicación de escritorio para control de stock de dispositivos iPhone.',
+                    longDesc: 'Solución de software a medida creada para una tienda de electrónica. Permite escanear códigos, registrar ingresos y egresos de mercadería (específicamente equipos móviles), y generar reportes mensuales de ventas y ganancias.',
+                    features: [
+                        'Interfaz gráfica amigable e intuitiva.',
+                        'Base de datos local segura (SQLite).',
+                        'Buscador instantáneo por IMEI o modelo.',
+                        'Generación de reportes.'
+                    ],
+                    tech: ['Python', 'Tkinter', 'SQLite'],
+                    icon: '💻',
+                    demoLink: '', 
+                    repoLink: '#',
+                    // AQUI ESTÁ EL EJEMPLO DE CÓDIGO
+                    codePreview: {
+                        explanation: 'Este fragmento de Python muestra la función principal para registrar un nuevo iPhone en la base de datos SQLite. Incluye una validación para asegurar que el IMEI ingresado tenga exactamente 15 dígitos.',
+                        code: 'def registrar_iphone(imei, modelo, capacidad):\n    # Validación básica de seguridad\n    if len(str(imei)) != 15:\n        return "Error: El IMEI debe tener 15 dígitos"\n    \n    try:\n        # Inserción segura con parámetros para evitar Inyección SQL\n        cursor.execute(\n            "INSERT INTO stock (imei, modelo, capacidad) VALUES (?, ?, ?)", \n            (imei, modelo, capacidad)\n        )\n        db.commit()\n        return "Dispositivo registrado con éxito"\n    except Exception as e:\n        return f"Error en la base de datos: {e}"'
+                    }
                 }
             ];
 
@@ -295,7 +367,6 @@
             const initChart = () => {
                 const ctx = document.getElementById('skillsRadarChart').getContext('2d');
                 
-                // Wrapping labels function required by constraints
                 const formatLabel = (str, max) => {
                     const words = str.split(" ");
                     let lines = [];
@@ -316,16 +387,16 @@
                     type: 'radar',
                     data: {
                         labels: [
-                            formatLabel('Desarrollo Backend (PHP, Python)', 16),
-                            formatLabel('Desarrollo Frontend & Web', 16),
-                            formatLabel('Bases de Datos (MySQL)', 16),
-                            formatLabel('IA & Automatización (n8n)', 16),
-                            formatLabel('Diseño UI/UX & Gráfico', 16),
-                            formatLabel('Marketing & Gestión', 16)
+                            formatLabel('Backend (PHP, Python)', 16),
+                            formatLabel('Frontend & Web Apps', 16),
+                            formatLabel('Bases de Datos', 16),
+                            formatLabel('IA & Automatización', 16),
+                            formatLabel('Diseño UI/UX', 16),
+                            formatLabel('Lógica de Negocios', 16)
                         ],
                         datasets: [{
                             label: 'Nivel de Competencia (%)',
-                            data: [85, 80, 85, 90, 85, 75],
+                            data: [85, 80, 85, 90, 85, 80],
                             backgroundColor: 'rgba(20, 184, 166, 0.2)', // Brand 500 alpha
                             borderColor: 'rgba(20, 184, 166, 1)',
                             pointBackgroundColor: 'rgba(139, 92, 246, 1)', // Accent Purple
@@ -337,7 +408,7 @@
                     },
                     options: {
                         responsive: true,
-                        maintainAspectRatio: false, // Critical for container bounds
+                        maintainAspectRatio: false,
                         scales: {
                             r: {
                                 angleLines: { color: 'rgba(0, 0, 0, 0.05)' },
@@ -358,11 +429,7 @@
                                 padding: 12,
                                 cornerRadius: 8,
                                 displayColors: false,
-                                callbacks: {
-                                    label: function(context) {
-                                        return context.raw + '% de dominio';
-                                    }
-                                }
+                                callbacks: { label: (ctx) => ctx.raw + '% de dominio' }
                             }
                         }
                     }
@@ -371,14 +438,13 @@
 
 
             // --- 3. TIMELINE INTERACTION LOGIC ---
-            const timelineList = document.getElementById('timeline-list');
-            const timelineDetails = document.getElementById('timeline-details');
-
             const renderTimeline = () => {
+                const timelineList = document.getElementById('timeline-list');
+                const timelineDetails = document.getElementById('timeline-details');
+
                 timelineList.innerHTML = '';
                 timelineData.forEach((item, index) => {
                     const btn = document.createElement('button');
-                    // Styling standard vs active
                     btn.className = `timeline-item w-full text-left p-4 rounded-xl border-l-4 border-transparent hover:bg-slate-50 transition-colors flex items-center gap-4 ${index === 0 ? 'active' : ''}`;
                     btn.dataset.id = item.id;
                     
@@ -391,24 +457,19 @@
                     `;
 
                     btn.addEventListener('click', () => {
-                        // Update active class
                         document.querySelectorAll('.timeline-item').forEach(el => el.classList.remove('active', 'bg-f0fdfa', 'border-brand-500'));
                         btn.classList.add('active');
-                        // Render detail
-                        showTimelineDetail(item);
+                        showTimelineDetail(item, timelineDetails);
                     });
 
                     timelineList.appendChild(btn);
                 });
-                
-                // Show first item by default
-                showTimelineDetail(timelineData[0]);
+                showTimelineDetail(timelineData[0], timelineDetails);
             };
 
-            const showTimelineDetail = (item) => {
+            const showTimelineDetail = (item, container) => {
                 const tagsHtml = item.tags.map(tag => `<span class="px-2 py-1 bg-white border border-slate-200 text-slate-600 text-[10px] uppercase font-bold tracking-wider rounded-md">${tag}</span>`).join('');
-                
-                timelineDetails.innerHTML = `
+                container.innerHTML = `
                     <div class="animate-[fadeIn_0.3s_ease-out]">
                         <div class="inline-flex items-center px-2 py-1 rounded bg-slate-200 text-slate-700 text-xs font-bold mb-3 uppercase tracking-wider">
                             ${item.type}
@@ -426,9 +487,89 @@
             };
 
 
-            // --- 4. PORTFOLIO FILTER LOGIC ---
+            // --- 4. PORTFOLIO & MODAL LOGIC ---
             const portfolioGrid = document.getElementById('portfolio-grid');
             const filterBtns = document.querySelectorAll('.filter-btn');
+            
+            // Modal Elements
+            const modal = document.getElementById('project-modal');
+            const closeModalBtn = document.getElementById('close-modal');
+            const mTitle = document.getElementById('modal-title');
+            const mIcon = document.getElementById('modal-icon');
+            const mTags = document.getElementById('modal-tags');
+            const mDesc = document.getElementById('modal-description');
+            const mFeatures = document.getElementById('modal-features');
+            const mDemoBtn = document.getElementById('modal-demo-link');
+            const mRepoBtn = document.getElementById('modal-repo-link');
+            
+            // Code Preview Elements
+            const mCodeSection = document.getElementById('modal-code-section');
+            const mCodeExplanation = document.getElementById('modal-code-explanation');
+            const mCodeBlock = document.getElementById('modal-code-block');
+
+            const openModal = (projectId) => {
+                const project = portfolioData.find(p => p.id === projectId);
+                if (!project) return;
+
+                // Populate Data
+                mTitle.textContent = project.title;
+                mIcon.textContent = project.icon;
+                mDesc.textContent = project.longDesc;
+                
+                mTags.innerHTML = project.tech.map(t => 
+                    `<span class="px-3 py-1 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg border border-slate-200">${t}</span>`
+                ).join('');
+
+                mFeatures.innerHTML = project.features.map(f => 
+                    `<li>${f}</li>`
+                ).join('');
+
+                // Check and show CODE PREVIEW
+                if (project.codePreview) {
+                    mCodeExplanation.textContent = project.codePreview.explanation;
+                    mCodeBlock.textContent = project.codePreview.code;
+                    mCodeSection.classList.remove('hidden');
+                } else {
+                    mCodeSection.classList.add('hidden');
+                }
+
+                // Manage Links (Hide if empty/hash)
+                if (project.demoLink && project.demoLink !== '' && project.demoLink !== '#') {
+                    mDemoBtn.href = project.demoLink;
+                    mDemoBtn.classList.remove('hidden');
+                } else {
+                    mDemoBtn.classList.add('hidden');
+                }
+
+                if (project.repoLink && project.repoLink !== '' && project.repoLink !== '#') {
+                    mRepoBtn.href = project.repoLink;
+                    mRepoBtn.classList.remove('hidden');
+                } else {
+                    mRepoBtn.classList.add('hidden');
+                }
+
+                // Show Modal
+                modal.classList.remove('hidden');
+                setTimeout(() => modal.classList.add('visible'), 10);
+                document.body.style.overflow = 'hidden'; 
+            };
+
+            const closeModal = () => {
+                modal.classList.remove('visible');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    document.body.style.overflow = 'auto'; 
+                }, 300); 
+            };
+
+            closeModalBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal(); 
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && modal.classList.contains('visible')) closeModal();
+            });
+
 
             const renderPortfolio = (filterCategory = 'all') => {
                 portfolioGrid.innerHTML = '';
@@ -438,50 +579,52 @@
                     : portfolioData.filter(item => item.category === filterCategory);
 
                 if (filteredData.length === 0) {
-                    portfolioGrid.innerHTML = `<div class="col-span-full text-center text-slate-500 py-8">No hay proyectos en esta categoría aún.</div>`;
+                    portfolioGrid.innerHTML = `<div class="col-span-full text-center text-slate-500 py-12 bg-slate-50 rounded-2xl border border-dashed border-slate-300">Aún no he subido proyectos en esta categoría. ¡Pronto habrá novedades!</div>`;
                     return;
                 }
 
                 filteredData.forEach(project => {
-                    const techHtml = project.tech.map(t => `<span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold rounded">${t}</span>`).join('');
-                    
+                    const techHtml = project.tech.slice(0,3).map(t => `<span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold rounded">${t}</span>`).join('');
+                    const extraTech = project.tech.length > 3 ? `<span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold rounded">+${project.tech.length - 3}</span>` : '';
+
                     const card = document.createElement('div');
-                    card.className = 'interactive-card bg-white border border-slate-200 rounded-2xl p-6 flex flex-col h-full animate-[fadeIn_0.4s_ease-out]';
+                    card.className = 'interactive-card bg-white border border-slate-200 rounded-2xl p-6 flex flex-col h-full animate-[fadeIn_0.4s_ease-out] relative group';
                     card.innerHTML = `
-                        <div class="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-2xl mb-4 border border-slate-100">
+                        <div class="absolute inset-0 bg-brand-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+                        <div class="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-2xl mb-4 border border-slate-100 shadow-sm">
                             ${project.icon}
                         </div>
                         <h4 class="text-lg font-bold text-slate-900 mb-2">${project.title}</h4>
-                        <p class="text-sm text-slate-600 mb-6 flex-grow">${project.desc}</p>
-                        <div class="flex flex-wrap gap-1.5 mt-auto">
-                            ${techHtml}
+                        <p class="text-sm text-slate-600 mb-6 flex-grow">${project.shortDesc}</p>
+                        <div class="flex flex-wrap gap-1.5 mt-auto mb-4">
+                            ${techHtml} ${extraTech}
+                        </div>
+                        <div class="mt-auto border-t border-slate-100 pt-4 text-brand-600 text-sm font-bold flex items-center justify-between group-hover:text-brand-700">
+                            Ver detalles <span>→</span>
                         </div>
                     `;
+                    
+                    card.addEventListener('click', () => openModal(project.id));
                     portfolioGrid.appendChild(card);
                 });
             };
 
             filterBtns.forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    // Update UI
                     filterBtns.forEach(b => {
                         b.classList.remove('active', 'bg-slate-900', 'text-white');
                         b.classList.add('bg-slate-100', 'text-slate-600');
                     });
-                    
                     const target = e.target;
                     target.classList.remove('bg-slate-100', 'text-slate-600');
                     target.classList.add('active', 'bg-slate-900', 'text-white');
-                    
-                    // Filter Data
                     renderPortfolio(target.dataset.filter);
                 });
             });
 
-            // Add simple fade animation to Tailwind
             tailwind.config.theme.extend.keyframes = {
                 fadeIn: {
-                    '0%': { opacity: '0', transform: 'translateY(10px)' },
+                    '0%': { opacity: '0', transform: 'translateY(15px)' },
                     '100%': { opacity: '1', transform: 'translateY(0)' },
                 }
             };
