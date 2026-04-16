@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gonzalo Arreseygor | Interactive Resume Dashboard</title>
+    <title>Gonzalo Arreseygor | Full Stack & AI Developer</title>
     
-    <!-- Favicon (Emoji de computadora) -->
+    <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
 
     <!-- Tailwind CSS -->
@@ -14,25 +14,36 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- Tailwind Config for Custom Palette -->
+    <!-- Tailwind Config for Custom Palette & Animations -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        brand: {
-                            50: '#f0fdfa',
-                            100: '#ccfbf1',
-                            500: '#14b8a6',
-                            600: '#0d9488',
-                            900: '#134e4a',
-                        },
-                        accent: {
-                            500: '#8b5cf6', 
-                        }
+                        brand: { 50: '#f0fdfa', 100: '#ccfbf1', 500: '#14b8a6', 600: '#0d9488', 900: '#134e4a' },
+                        accent: { 500: '#8b5cf6' }
                     },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                        'marquee': 'marquee 25s linear infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        },
+                        marquee: {
+                            '0%': { transform: 'translateX(0%)' },
+                            '100%': { transform: 'translateX(-100%)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
                     }
                 }
             }
@@ -40,100 +51,181 @@
     </script>
 
     <style>
-        body { background-color: #f8fafc; color: #0f172a; }
+        body { background-color: #f8fafc; color: #0f172a; overflow-x: hidden; }
         
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 40vh;
-            max-height: 350px;
+        /* Chart constraints */
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin: auto; height: 40vh; max-height: 350px; }
+        @media (min-width: 768px) { .chart-container { height: 350px; } }
+
+        /* Glassmorphism Classes */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
         }
 
-        @media (min-width: 768px) {
-            .chart-container { height: 350px; }
+        /* Hover Interactions */
+        .interactive-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
+        .interactive-card:hover { 
+            transform: translateY(-8px) scale(1.02); 
+            box-shadow: 0 25px 30px -5px rgba(20, 184, 166, 0.15), 0 10px 10px -5px rgba(20, 184, 166, 0.05); 
+            border-color: #14b8a6; 
         }
-
-        .interactive-card { transition: all 0.3s ease; cursor: pointer; }
-        .interactive-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); border-color: #14b8a6; }
         
-        .timeline-item.active { border-left-color: #14b8a6; background-color: #f0fdfa; }
-        .filter-btn.active { background-color: #0f172a; color: white; }
+        .timeline-item { transition: all 0.3s ease; }
+        .timeline-item.active { border-left-color: #14b8a6; background-color: #f0fdfa; transform: translateX(8px); }
+        .filter-btn { transition: all 0.3s ease; }
+        .filter-btn.active { background-color: #0f172a; color: white; transform: scale(1.05); }
         
         /* Modal animations */
-        #project-modal { transition: opacity 0.3s ease; }
+        #project-modal { transition: opacity 0.4s ease; }
         #project-modal.hidden { opacity: 0; pointer-events: none; }
         #project-modal.visible { opacity: 1; pointer-events: auto; }
-        #modal-content { transition: transform 0.3s ease; transform: translateY(20px); }
-        #project-modal.visible #modal-content { transform: translateY(0); }
+        #modal-content { transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); transform: translateY(40px) scale(0.95); }
+        #project-modal.visible #modal-content { transform: translateY(0) scale(1); }
+
+        /* Scroll Reveal Animation Classes */
+        .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.5, 0, 0, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+        
+        /* Typing cursor */
+        .typing-cursor::after { content: '|'; animation: blink 1s step-end infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
     </style>
 </head>
-<body class="antialiased min-h-screen relative">
+<body class="antialiased min-h-screen relative font-sans">
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- ANIMATED BACKGROUND BLOBS (Otorga el efecto Premium/Agencia) -->
+    <div class="fixed inset-0 w-full h-full pointer-events-none z-[-1] overflow-hidden">
+        <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-brand-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
+        <div class="absolute top-[20%] right-[-10%] w-96 h-96 bg-accent-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob" style="animation-delay: 2s;"></div>
+        <div class="absolute bottom-[-20%] left-[20%] w-96 h-96 bg-blue-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob" style="animation-delay: 4s;"></div>
+    </div>
+
+    <!-- FLOATING NAVBAR -->
+    <nav class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 glass-card px-6 py-3 rounded-full shadow-lg border border-white/50 flex gap-6 text-sm font-semibold text-slate-600 transition-all hover:shadow-xl reveal" style="transition-delay: 0.5s;">
+        <a href="#inicio" class="hover:text-brand-600 transition-colors">Inicio</a>
+        <a href="#perfil" class="hover:text-brand-600 transition-colors hidden sm:block">Perfil</a>
+        <a href="#experiencia" class="hover:text-brand-600 transition-colors">Experiencia</a>
+        <a href="#portafolio" class="hover:text-brand-600 transition-colors">Portafolio</a>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         
-        <!-- HEADER SECTION -->
-        <header class="bg-white rounded-3xl p-8 shadow-sm border border-slate-200 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-64 h-64 bg-brand-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 opacity-60 pointer-events-none"></div>
-            
+        <!-- HEADER SECTION (HERO) -->
+        <header id="inicio" class="glass-card rounded-[2.5rem] p-8 md:p-16 shadow-xl mb-16 flex flex-col md:flex-row items-center justify-between gap-10 relative overflow-hidden reveal">
             <div class="flex-1 relative z-10">
-                <div class="inline-flex items-center px-3 py-1 rounded-full bg-brand-50 text-brand-600 text-xs font-bold mb-4 tracking-wider uppercase border border-brand-100">
-                    🟢 Disponible para proyectos
+                <div class="inline-flex items-center px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-600 text-xs font-bold mb-6 tracking-widest uppercase border border-emerald-200 shadow-sm animate-float">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span> Disponible para proyectos
                 </div>
-                <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 mb-2">Gonzalo Arreseygor</h1>
-                <h2 class="text-xl text-slate-500 font-medium mb-4">Desarrollador Full Stack | Diseñador | Especialista IA</h2>
-                <p class="text-slate-600 max-w-2xl leading-relaxed">
-                    Estudiante de Desarrollo de Software apasionado por la automatización con IA y la creación de soluciones web eficientes. Combino mis habilidades en programación, diseño y marketing digital para ofrecer productos integrales.
+                
+                <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-4 drop-shadow-sm">
+                    Gonzalo <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-accent-600">Arreseygor</span>
+                </h1>
+                
+                <!-- TYPING EFFECT CONTAINER -->
+                <h2 class="text-xl md:text-2xl text-slate-600 font-medium mb-6 h-8">
+                    <span id="typing-text" class="typing-cursor"></span>
+                </h2>
+                
+                <p class="text-slate-600 max-w-2xl leading-relaxed text-lg mb-8">
+                    Estudiante de Desarrollo de Software especializado en la automatización de flujos de trabajo con Inteligencia Artificial y la creación de arquitecturas web robustas. Transformo problemas complejos en soluciones digitales elegantes.
                 </p>
+                
+                <div class="flex flex-wrap gap-4">
+                    <a href="#portafolio" class="px-8 py-4 bg-slate-900 text-white rounded-full font-bold shadow-xl shadow-slate-900/20 hover:bg-brand-600 hover:shadow-brand-500/30 transition-all transform hover:-translate-y-1">
+                        Ver Proyectos
+                    </a>
+                    <a href="mailto:gonzalojesusarreseygor@gmail.com" class="px-8 py-4 glass-card text-slate-800 rounded-full font-bold hover:bg-white transition-all transform hover:-translate-y-1 flex items-center gap-2">
+                        <span>💬</span> Hablemos
+                    </a>
+                </div>
             </div>
             
-            <div class="flex flex-col gap-3 text-sm text-slate-600 bg-slate-50 p-5 rounded-2xl border border-slate-100 w-full md:w-auto relative z-10">
-                <div class="flex items-center gap-2"><span>📧</span> <a href="mailto:gonzalojesusarreseygor@gmail.com" class="hover:text-brand-600 font-medium transition-colors">gonzalojesusarreseygor@gmail.com</a></div>
-                <div class="flex items-center gap-2"><span>📱</span> <span>+54 9 3436 474 518</span></div>
-                <div class="flex items-center gap-2"><span>📍</span> <span>Victoria, Entre Ríos, Argentina</span></div>
-                <div class="flex items-center gap-2"><span>🎂</span> <span>21/03/2004</span></div>
+            <!-- Contact Box flotante -->
+            <div class="flex flex-col gap-4 text-sm text-slate-700 glass-card p-8 rounded-3xl w-full md:w-80 shadow-2xl animate-float" style="animation-delay: 1s;">
+                <h3 class="font-bold text-lg mb-2 text-slate-900 border-b border-slate-200 pb-2">Información de Contacto</h3>
+                <a href="mailto:gonzalojesusarreseygor@gmail.com" class="flex items-center gap-3 hover:text-brand-600 transition-colors group p-2 rounded-lg hover:bg-white/50">
+                    <span class="text-xl group-hover:scale-110 transition-transform">📧</span> 
+                    <span class="truncate">gonzalojesusarreseygor@gmail.com</span>
+                </a>
+                <div class="flex items-center gap-3 p-2">
+                    <span class="text-xl">📱</span> <span>+54 9 3436 474 518</span>
+                </div>
+                <div class="flex items-center gap-3 p-2">
+                    <span class="text-xl">📍</span> <span>Victoria, Entre Ríos, AR</span>
+                </div>
+                <div class="flex items-center gap-3 p-2">
+                    <span class="text-xl">🎓</span> <span>Desarrollador Software</span>
+                </div>
             </div>
         </header>
 
+        <!-- TECH STACK MARQUEE (Cinta infinita) -->
+        <div class="w-full overflow-hidden mb-16 py-4 border-y border-slate-200/50 reveal">
+            <div class="flex whitespace-nowrap animate-marquee">
+                <!-- Se repite dos veces para el efecto infinito -->
+                <div class="flex gap-12 px-6 items-center text-xl font-bold text-slate-400">
+                    <span class="flex items-center gap-2">💻 JavaScript</span>
+                    <span class="flex items-center gap-2">🐍 Python</span>
+                    <span class="flex items-center gap-2">🐘 PHP</span>
+                    <span class="flex items-center gap-2">🗄️ MySQL</span>
+                    <span class="flex items-center gap-2">⚙️ n8n</span>
+                    <span class="flex items-center gap-2">🤖 OpenAI API</span>
+                    <span class="flex items-center gap-2">🎨 Tailwind CSS</span>
+                    <span class="flex items-center gap-2">⚛️ React</span>
+                </div>
+                <div class="flex gap-12 px-6 items-center text-xl font-bold text-slate-400">
+                    <span class="flex items-center gap-2">💻 JavaScript</span>
+                    <span class="flex items-center gap-2">🐍 Python</span>
+                    <span class="flex items-center gap-2">🐘 PHP</span>
+                    <span class="flex items-center gap-2">🗄️ MySQL</span>
+                    <span class="flex items-center gap-2">⚙️ n8n</span>
+                    <span class="flex items-center gap-2">🤖 OpenAI API</span>
+                    <span class="flex items-center gap-2">🎨 Tailwind CSS</span>
+                    <span class="flex items-center gap-2">⚛️ React</span>
+                </div>
+            </div>
+        </div>
+
         <!-- KPI STATS -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center hover:border-brand-300 transition-colors">
-                <div class="text-3xl mb-2">💻</div>
-                <div class="text-2xl font-bold text-slate-900">+5</div>
-                <div class="text-xs text-slate-500 uppercase tracking-wide font-semibold">Lenguajes de Prog.</div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16 reveal">
+            <div class="glass-card p-6 rounded-3xl text-center interactive-card">
+                <div class="text-4xl mb-3">💻</div>
+                <div class="text-3xl font-extrabold text-slate-900">+5</div>
+                <div class="text-xs text-slate-500 uppercase tracking-widest font-bold mt-1">Lenguajes</div>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center hover:border-brand-300 transition-colors">
-                <div class="text-3xl mb-2">🤖</div>
-                <div class="text-2xl font-bold text-slate-900">IA</div>
-                <div class="text-xs text-slate-500 uppercase tracking-wide font-semibold">Automatización Activa</div>
+            <div class="glass-card p-6 rounded-3xl text-center interactive-card" style="transition-delay: 0.1s;">
+                <div class="text-4xl mb-3">🤖</div>
+                <div class="text-3xl font-extrabold text-slate-900">IA</div>
+                <div class="text-xs text-slate-500 uppercase tracking-widest font-bold mt-1">Integraciones</div>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center hover:border-brand-300 transition-colors">
-                <div class="text-3xl mb-2">🎨</div>
-                <div class="text-2xl font-bold text-slate-900">UI/UX</div>
-                <div class="text-xs text-slate-500 uppercase tracking-wide font-semibold">Diseño Integrado</div>
+            <div class="glass-card p-6 rounded-3xl text-center interactive-card" style="transition-delay: 0.2s;">
+                <div class="text-4xl mb-3">🎨</div>
+                <div class="text-3xl font-extrabold text-slate-900">UI/UX</div>
+                <div class="text-xs text-slate-500 uppercase tracking-widest font-bold mt-1">Diseño</div>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center hover:border-brand-300 transition-colors">
-                <div class="text-3xl mb-2">🎓</div>
-                <div class="text-2xl font-bold text-slate-900">En curso</div>
-                <div class="text-xs text-slate-500 uppercase tracking-wide font-semibold">Tecnicatura Sup.</div>
+            <div class="glass-card p-6 rounded-3xl text-center interactive-card" style="transition-delay: 0.3s;">
+                <div class="text-4xl mb-3">🎓</div>
+                <div class="text-3xl font-extrabold text-slate-900">2026</div>
+                <div class="text-xs text-slate-500 uppercase tracking-widest font-bold mt-1">Graduación</div>
             </div>
         </div>
 
         <!-- MAIN DASHBOARD CONTENT -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
             
             <!-- LEFT: SKILLS RADAR CHART -->
-            <section class="bg-white rounded-3xl p-8 shadow-sm border border-slate-200 flex flex-col relative overflow-hidden">
+            <section id="perfil" class="glass-card rounded-[2rem] p-8 flex flex-col relative overflow-hidden reveal">
                 <div class="mb-6 relative z-10">
-                    <h3 class="text-2xl font-bold text-slate-900 flex items-center gap-2"><span>📊</span> Perfil de Habilidades</h3>
-                    <p class="text-sm text-slate-500 mt-1">Análisis multidimensional de competencias técnicas y creativas.</p>
+                    <h3 class="text-2xl font-bold text-slate-900 flex items-center gap-2"><span>📊</span> Perfil Técnico</h3>
+                    <p class="text-sm text-slate-500 mt-1">Distribución de competencias y áreas de dominio.</p>
                 </div>
                 
                 <div class="flex-1 flex flex-col justify-center w-full relative z-10">
@@ -141,116 +233,104 @@
                         <canvas id="skillsRadarChart"></canvas>
                     </div>
                 </div>
-
-                <div class="mt-6 grid grid-cols-2 gap-3 text-sm relative z-10">
-                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                        <span class="font-bold text-slate-700">Desarrollo:</span> PHP, Python, Kotlin, JS, MySQL.
-                    </div>
-                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                        <span class="font-bold text-slate-700">IA & Datos:</span> n8n, Agentes AI, APIs.
-                    </div>
-                </div>
             </section>
 
             <!-- RIGHT: INTERACTIVE TIMELINE -->
-            <section class="bg-white rounded-3xl p-8 shadow-sm border border-slate-200">
+            <section id="experiencia" class="glass-card rounded-[2rem] p-8 reveal" style="transition-delay: 0.2s;">
                 <div class="mb-6">
-                    <h3 class="text-2xl font-bold text-slate-900 flex items-center gap-2"><span>⏳</span> Trayectoria Interactiva</h3>
-                    <p class="text-sm text-slate-500 mt-1">Selecciona un elemento para ver los detalles de experiencia y educación.</p>
+                    <h3 class="text-2xl font-bold text-slate-900 flex items-center gap-2"><span>⏳</span> Trayectoria</h3>
+                    <p class="text-sm text-slate-500 mt-1">Historial académico y profesional interactivo.</p>
                 </div>
 
                 <div class="flex flex-col md:flex-row gap-6">
-                    <div class="w-full md:w-1/2 space-y-2" id="timeline-list">
+                    <div class="w-full md:w-5/12 space-y-3" id="timeline-list">
                         <!-- Populated by JS -->
                     </div>
 
-                    <div class="w-full md:w-1/2 bg-slate-50 rounded-2xl p-6 border border-slate-100 relative" id="timeline-details">
-                        <div class="flex flex-col items-center justify-center h-full text-slate-400 text-center min-h-[200px]">
-                            <span class="text-4xl mb-2">👈</span>
-                            <p>Haz clic en un ítem de la lista para explorar sus detalles.</p>
-                        </div>
+                    <div class="w-full md:w-7/12 bg-white/50 rounded-2xl p-6 border border-white/60 shadow-inner relative overflow-hidden" id="timeline-details">
+                        <!-- Populated by JS -->
                     </div>
                 </div>
             </section>
-
         </div>
 
         <!-- BOTTOM: PORTFOLIO FILTER GALLERY -->
-        <section class="bg-white rounded-3xl p-8 shadow-sm border border-slate-200">
-            <div class="flex flex-col md:flex-row justify-between items-end mb-8 border-b border-slate-100 pb-6">
+        <section id="portafolio" class="glass-card rounded-[2rem] p-8 md:p-12 reveal">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-10 border-b border-slate-200/50 pb-8">
                 <div>
-                    <h3 class="text-2xl font-bold text-slate-900 flex items-center gap-2"><span>🚀</span> Aplicaciones y Proyectos</h3>
-                    <p class="text-sm text-slate-500 mt-1">Selecciona un proyecto para ver demos, código e información detallada.</p>
+                    <h3 class="text-3xl font-bold text-slate-900 flex items-center gap-3 mb-2"><span>🚀</span> Proyectos Destacados</h3>
+                    <p class="text-base text-slate-500">Explora mi portafolio, visualiza el código y prueba las demos.</p>
                 </div>
                 
                 <!-- Filters -->
-                <div class="flex gap-2 mt-4 md:mt-0 overflow-x-auto pb-2 md:pb-0" id="portfolio-filters">
-                    <button class="filter-btn active px-4 py-2 rounded-xl text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors whitespace-nowrap" data-filter="all">Todos</button>
-                    <button class="filter-btn px-4 py-2 rounded-xl text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors whitespace-nowrap" data-filter="webapp">Web Apps</button>
-                    <button class="filter-btn px-4 py-2 rounded-xl text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors whitespace-nowrap" data-filter="ai">Agentes IA</button>
-                    <button class="filter-btn px-4 py-2 rounded-xl text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors whitespace-nowrap" data-filter="software">Software Desktop</button>
+                <div class="flex gap-2 mt-6 md:mt-0 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto" id="portfolio-filters">
+                    <button class="filter-btn active px-5 py-2.5 rounded-full text-sm font-bold bg-white text-slate-600 hover:bg-slate-100 shadow-sm border border-slate-200 whitespace-nowrap" data-filter="all">Todos</button>
+                    <button class="filter-btn px-5 py-2.5 rounded-full text-sm font-bold bg-white text-slate-600 hover:bg-slate-100 shadow-sm border border-slate-200 whitespace-nowrap" data-filter="webapp">Web Apps</button>
+                    <button class="filter-btn px-5 py-2.5 rounded-full text-sm font-bold bg-white text-slate-600 hover:bg-slate-100 shadow-sm border border-slate-200 whitespace-nowrap" data-filter="ai">Agentes IA</button>
+                    <button class="filter-btn px-5 py-2.5 rounded-full text-sm font-bold bg-white text-slate-600 hover:bg-slate-100 shadow-sm border border-slate-200 whitespace-nowrap" data-filter="software">Software</button>
                 </div>
             </div>
 
             <!-- Portfolio Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="portfolio-grid">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="portfolio-grid">
                 <!-- Populated by JS -->
             </div>
         </section>
 
     </div>
 
-    <!-- MODAL PARA DETALLES DE PROYECTO (Hidden by default) -->
-    <div id="project-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div id="modal-content" class="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden relative">
+    <!-- MODAL PARA DETALLES DE PROYECTO -->
+    <div id="project-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[100] flex items-center justify-center p-4 hidden">
+        <div id="modal-content" class="bg-white rounded-[2rem] shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden relative border border-white/20">
             
-            <!-- Botón Cerrar -->
-            <button id="close-modal" class="absolute top-4 right-4 w-10 h-10 bg-slate-100 text-slate-600 rounded-full flex items-center justify-center hover:bg-slate-200 hover:text-slate-900 transition-colors z-10 text-xl font-bold">
+            <button id="close-modal" class="absolute top-6 right-6 w-10 h-10 bg-slate-100 text-slate-600 rounded-full flex items-center justify-center hover:bg-brand-500 hover:text-white transition-colors z-10 text-xl font-bold shadow-sm">
                 ✕
             </button>
 
-            <!-- Cabecera del Modal -->
-            <div class="bg-slate-50 p-8 border-b border-slate-100 flex items-center gap-6">
-                <div id="modal-icon" class="w-20 h-20 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center text-4xl">
-                    <!-- Icono inyectado -->
+            <div class="bg-slate-50/80 p-8 md:p-10 border-b border-slate-100 flex items-center gap-6 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-brand-500/10 rounded-full blur-2xl"></div>
+                <div id="modal-icon" class="w-20 h-20 bg-white rounded-2xl shadow-md border border-slate-100 flex items-center justify-center text-4xl relative z-10">
+                    <!-- Icono -->
                 </div>
-                <div>
-                    <h2 id="modal-title" class="text-3xl font-extrabold text-slate-900 mb-2">Título del Proyecto</h2>
+                <div class="relative z-10">
+                    <h2 id="modal-title" class="text-3xl font-extrabold text-slate-900 mb-3">Título</h2>
                     <div id="modal-tags" class="flex flex-wrap gap-2">
-                        <!-- Etiquetas inyectadas -->
+                        <!-- Etiquetas -->
                     </div>
                 </div>
             </div>
 
-            <!-- Cuerpo del Modal -->
-            <div class="p-8 overflow-y-auto flex-1">
-                <h3 class="text-lg font-bold text-slate-900 mb-3">Descripción del Proyecto</h3>
-                <p id="modal-description" class="text-slate-600 leading-relaxed mb-8">
+            <div class="p-8 md:p-10 overflow-y-auto flex-1 custom-scrollbar">
+                <h3 class="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2"><span>📝</span> Visión General</h3>
+                <p id="modal-description" class="text-slate-600 leading-relaxed mb-8 text-base">
                     Descripción detallada...
                 </p>
 
-                <h3 class="text-lg font-bold text-slate-900 mb-3">Características Principales</h3>
-                <ul id="modal-features" class="list-disc list-inside text-slate-600 space-y-2 mb-8 marker:text-brand-500">
-                    <!-- Features inyectadas -->
+                <h3 class="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2"><span>✨</span> Características Clave</h3>
+                <ul id="modal-features" class="list-none text-slate-600 space-y-3 mb-8">
+                    <!-- Features -->
                 </ul>
 
-                <!-- SECCIÓN DE CÓDIGO (Nuevo) -->
-                <div id="modal-code-section" class="hidden mb-8 border-t border-slate-100 pt-6">
+                <div id="modal-code-section" class="hidden mb-4 border-t border-slate-100 pt-8">
                     <h3 class="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2"><span>💻</span> Vistazo al Código</h3>
                     <p id="modal-code-explanation" class="text-slate-600 mb-4 text-sm leading-relaxed"></p>
-                    <div class="bg-[#0f172a] rounded-xl p-4 overflow-x-auto shadow-inner border border-slate-700">
-                        <pre><code id="modal-code-block" class="text-emerald-400 font-mono text-sm whitespace-pre-wrap"></code></pre>
+                    <div class="bg-[#0f172a] rounded-2xl p-5 overflow-x-auto shadow-inner border border-slate-700/50 relative group">
+                        <div class="absolute top-3 left-4 flex gap-1.5">
+                            <div class="w-3 h-3 rounded-full bg-rose-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-amber-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+                        </div>
+                        <pre class="mt-6"><code id="modal-code-block" class="text-emerald-400 font-mono text-sm whitespace-pre-wrap leading-relaxed"></code></pre>
                     </div>
                 </div>
             </div>
 
-            <!-- Pie del Modal (Botones de acción) -->
-            <div class="bg-slate-50 p-6 border-t border-slate-100 flex gap-4 justify-end">
-                <a id="modal-repo-link" href="#" target="_blank" class="px-6 py-3 rounded-xl font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition-colors flex items-center gap-2 hidden">
-                    <span>💻</span> Ver Repositorio
+            <div class="bg-slate-50/80 p-6 md:px-10 border-t border-slate-100 flex flex-wrap gap-4 justify-end">
+                <a id="modal-repo-link" href="#" target="_blank" class="px-6 py-3 rounded-full font-bold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition-all flex items-center gap-2 shadow-sm hidden transform hover:-translate-y-1">
+                    <span>⚙️</span> Repositorio
                 </a>
-                <a id="modal-demo-link" href="#" target="_blank" class="px-6 py-3 rounded-xl font-semibold bg-brand-600 text-white hover:bg-brand-700 transition-colors flex items-center gap-2 shadow-lg shadow-brand-200 hidden">
-                    <span>🌐</span> Visitar App
+                <a id="modal-demo-link" href="#" target="_blank" class="px-6 py-3 rounded-full font-bold bg-brand-600 text-white hover:bg-brand-700 transition-all flex items-center gap-2 shadow-lg shadow-brand-500/30 hidden transform hover:-translate-y-1">
+                    <span>🌐</span> Ver Proyecto en Vivo
                 </a>
             </div>
         </div>
@@ -260,104 +340,104 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             
-            // --- 1. DATA STORAGE ---
+            // --- 0. EFECTOS PREMIUM (Typing & Reveal) ---
             
-            // Timeline Data
+            // Typing Effect para el subtítulo
+            const textsToType = ["Desarrollador Full Stack.", "Arquitecto de Agentes IA.", "Diseñador UI/UX."];
+            let textIndex = 0;
+            let charIndex = 0;
+            let isDeleting = false;
+            const typingElement = document.getElementById('typing-text');
+
+            function type() {
+                const currentText = textsToType[textIndex];
+                
+                if (isDeleting) {
+                    typingElement.textContent = currentText.substring(0, charIndex - 1);
+                    charIndex--;
+                } else {
+                    typingElement.textContent = currentText.substring(0, charIndex + 1);
+                    charIndex++;
+                }
+
+                let typeSpeed = isDeleting ? 50 : 100;
+
+                if (!isDeleting && charIndex === currentText.length) {
+                    typeSpeed = 2000; // Pausa al terminar de escribir
+                    isDeleting = true;
+                } else if (isDeleting && charIndex === 0) {
+                    isDeleting = false;
+                    textIndex = (textIndex + 1) % textsToType.length;
+                    typeSpeed = 500; // Pausa antes de la siguiente palabra
+                }
+
+                setTimeout(type, typeSpeed);
+            }
+            setTimeout(type, 1000); // Iniciar tipado
+
+            // Scroll Reveal Animation (Intersection Observer)
+            const revealElements = document.querySelectorAll('.reveal');
+            const revealOptions = { threshold: 0.1, rootMargin: "0px 0px -50px 0px" };
+            
+            const revealOnScroll = new IntersectionObserver(function(entries, observer) {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) return;
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target); // Dejar de observar una vez animado
+                });
+            }, revealOptions);
+
+            revealElements.forEach(el => revealOnScroll.observe(el));
+
+
+            // --- 1. DATA STORAGE ---
             const timelineData = [
                 {
-                    id: 'ai-agents',
-                    title: 'Control y Creación de Agentes AI',
-                    period: '2025 - Actualidad',
-                    type: 'Experiencia',
-                    icon: '🤖',
+                    id: 'ai-agents', title: 'Control y Creación de Agentes AI', period: '2025 - Actualidad', type: 'Experiencia', icon: '🤖',
                     details: 'Desarrollo e implementación de sistemas automatizados inteligentes. Uso de plataformas como n8n y modelos de lenguaje (LLMs) para optimizar procesos comerciales y de gestión.',
-                    tags: ['n8n', 'IA', 'Automatización', 'APIs']
+                    tags: ['n8n', 'IA', 'APIs']
                 },
                 {
-                    id: 'tech-degree',
-                    title: 'Tecnicatura Sup. en Análisis y Desarrollo de Software',
-                    period: '2024 - 2026',
-                    type: 'Educación',
-                    icon: '🎓',
-                    details: 'Formación superior en el Instituto Gaspar Benavento. Adquisición de metodologías ágiles, bases de datos avanzadas, algoritmia y arquitectura de software.',
-                    tags: ['Ingeniería de Software', 'Bases de Datos', 'POO']
+                    id: 'tech-degree', title: 'Tecnicatura Sup. en Software', period: '2024 - 2026', type: 'Educación', icon: '🎓',
+                    details: 'Formación superior orientada a metodologías ágiles, bases de datos avanzadas, algoritmia y arquitectura de software escalable.',
+                    tags: ['Ingeniería', 'Bases de Datos', 'POO']
                 },
                 {
-                    id: 'ecommerce',
-                    title: 'Desarrollo E-commerce Indumentaria',
-                    period: '2023 - 2024',
-                    type: 'Experiencia',
-                    icon: '🛍️',
-                    details: 'Creación de una plataforma de ventas online completa como desarrollador Full Stack Freelance. Implementación de carrito de compras y gestión de inventario.',
-                    tags: ['PHP', 'MySQL', 'Diseño Web', 'Gestión']
+                    id: 'ecommerce', title: 'Desarrollo E-commerce', period: '2023 - 2024', type: 'Experiencia', icon: '🛍️',
+                    details: 'Creación de una plataforma de ventas online completa como desarrollador Full Stack Freelance. Gestión de carrito e inventario.',
+                    tags: ['PHP', 'MySQL', 'Diseño']
                 },
                 {
-                    id: 'puma',
-                    title: 'Pasantía Logística - Puma Energy',
-                    period: 'Experiencia Previa',
-                    type: 'Experiencia',
-                    icon: '📋',
-                    details: 'Responsable del seguimiento de stock, atención al cliente y gestión logística interna. Esta experiencia forjó mis habilidades de organización y responsabilidad laboral.',
-                    tags: ['Logística', 'Control de Stock', 'Atención']
+                    id: 'puma', title: 'Pasantía Logística', period: 'Experiencia Previa', type: 'Experiencia', icon: '📋',
+                    details: 'Responsable del seguimiento de stock y atención al cliente. Forjó mis habilidades de organización y responsabilidad laboral.',
+                    tags: ['Logística', 'Control']
                 }
             ];
 
-            // PORTFOLIO DATA EXPANDED
             const portfolioData = [
                 {
-                    id: 1,
-                    title: 'E-commerce "Capibara"',
-                    category: 'webapp',
+                    id: 1, title: 'E-commerce "Capibara"', category: 'webapp', icon: '🛒',
                     shortDesc: 'Plataforma web dinámica con catálogo de productos y carrito de compras.',
                     longDesc: 'Diseño y desarrollo completo de una tienda online para venta de indumentaria criolla. El sistema cuenta con un panel administrativo personalizado para gestionar el stock, subir productos, procesar órdenes y administrar clientes.',
-                    features: [
-                        'Panel de administración (CRUD de productos).',
-                        'Integración con pasarela de pagos local.',
-                        'Diseño responsivo optimizado para móviles.',
-                        'Gestión automática de stock.'
-                    ],
-                    tech: ['PHP', 'MySQL', 'JavaScript', 'Bootstrap'],
-                    icon: '🛒',
-                    demoLink: '#', 
-                    repoLink: '#'  
+                    features: ['Panel de administración (CRUD)', 'Integración con pasarela de pagos', 'Gestión automática de stock'],
+                    tech: ['PHP', 'MySQL', 'JavaScript'], demoLink: '#', repoLink: '#'  
                 },
                 {
-                    id: 2,
-                    title: 'Asistente IA para Reservas',
-                    category: 'ai',
+                    id: 2, title: 'Asistente IA para Reservas', category: 'ai', icon: '🧠',
                     shortDesc: 'Agente inteligente que gestiona reservas deportivas vía WhatsApp/Web.',
-                    longDesc: 'Implementación de un flujo conversacional automatizado utilizando n8n y la API de ChatGPT. El bot entiende lenguaje natural, consulta disponibilidad en una base de datos en tiempo real y agenda o cancela turnos para canchas deportivas sin intervención humana.',
-                    features: [
-                        'Procesamiento de Lenguaje Natural (NLP).',
-                        'Automatización de flujos con n8n.',
-                        'Conexión con calendario de Google / Base de datos.',
-                        'Soporte 24/7 para clientes.'
-                    ],
-                    tech: ['n8n', 'OpenAI API', 'Node.js', 'Webhooks'],
-                    icon: '🧠',
-                    demoLink: '#',
-                    repoLink: '#'
+                    longDesc: 'Implementación de un flujo conversacional automatizado utilizando n8n y la API de ChatGPT. El bot entiende lenguaje natural, consulta disponibilidad en una base de datos en tiempo real y agenda turnos.',
+                    features: ['Procesamiento de Lenguaje Natural (NLP)', 'Automatización con n8n', 'Conexión con calendarios externos'],
+                    tech: ['n8n', 'OpenAI API', 'Node.js'], demoLink: '#', repoLink: '#'
                 },
                 {
-                    id: 3,
-                    title: 'Inventory Manager (Desktop)',
-                    category: 'software',
+                    id: 3, title: 'Inventory Manager Pro', category: 'software', icon: '💻',
                     shortDesc: 'Aplicación de escritorio para control de stock de dispositivos iPhone.',
-                    longDesc: 'Solución de software a medida creada para una tienda de electrónica. Permite escanear códigos, registrar ingresos y egresos de mercadería (específicamente equipos móviles), y generar reportes mensuales de ventas y ganancias.',
-                    features: [
-                        'Interfaz gráfica amigable e intuitiva.',
-                        'Base de datos local segura (SQLite).',
-                        'Buscador instantáneo por IMEI o modelo.',
-                        'Generación de reportes.'
-                    ],
-                    tech: ['Python', 'Tkinter', 'SQLite'],
-                    icon: '💻',
-                    demoLink: '', 
-                    repoLink: '#',
-                    // AQUI ESTÁ EL EJEMPLO DE CÓDIGO
+                    longDesc: 'Solución de software a medida creada para una tienda de electrónica. Permite escanear códigos, registrar ingresos y egresos de mercadería, y generar reportes mensuales de ventas y ganancias.',
+                    features: ['Interfaz gráfica intuitiva', 'Base de datos local segura', 'Buscador instantáneo por IMEI'],
+                    tech: ['Python', 'Tkinter', 'SQLite'], demoLink: '', repoLink: '#',
                     codePreview: {
-                        explanation: 'Este fragmento de Python muestra la función principal para registrar un nuevo iPhone en la base de datos SQLite. Incluye una validación para asegurar que el IMEI ingresado tenga exactamente 15 dígitos.',
-                        code: 'def registrar_iphone(imei, modelo, capacidad):\n    # Validación básica de seguridad\n    if len(str(imei)) != 15:\n        return "Error: El IMEI debe tener 15 dígitos"\n    \n    try:\n        # Inserción segura con parámetros para evitar Inyección SQL\n        cursor.execute(\n            "INSERT INTO stock (imei, modelo, capacidad) VALUES (?, ?, ?)", \n            (imei, modelo, capacidad)\n        )\n        db.commit()\n        return "Dispositivo registrado con éxito"\n    except Exception as e:\n        return f"Error en la base de datos: {e}"'
+                        explanation: 'Fragmento de la función en Python que asegura la integridad de los datos validando el IMEI antes de realizar la inserción segura (previniendo inyecciones SQL) en la base de datos local SQLite.',
+                        code: 'def registrar_iphone(imei, modelo, capacidad):\n    # Validación de seguridad del formato IMEI\n    if not str(imei).isdigit() or len(str(imei)) != 15:\n        raise ValueError("El IMEI debe tener exactamente 15 dígitos numéricos")\n    \n    try:\n        # Inserción parametrizada para prevenir SQL Injection\n        query = "INSERT INTO stock (imei, modelo, capacidad) VALUES (?, ?, ?)"\n        cursor.execute(query, (imei, modelo, capacidad))\n        db.commit()\n        \n        log_operation("INSERT", f"iPhone {modelo} - IMEI: {imei}")\n        return True\n        \n    except sqlite3.IntegrityError:\n        return "Error: Este IMEI ya existe en el inventario"\n    except Exception as e:\n        return f"Error crítico del sistema: {str(e)}"'
                     }
                 }
             ];
@@ -366,70 +446,46 @@
             // --- 2. CHART.JS INITIALIZATION (Skills Radar) ---
             const initChart = () => {
                 const ctx = document.getElementById('skillsRadarChart').getContext('2d');
-                
                 const formatLabel = (str, max) => {
-                    const words = str.split(" ");
-                    let lines = [];
-                    let currentLine = words[0];
+                    const words = str.split(" "); let lines = []; let currentLine = words[0];
                     for (let i = 1; i < words.length; i++) {
-                        if (currentLine.length + words[i].length + 1 <= max) {
-                            currentLine += " " + words[i];
-                        } else {
-                            lines.push(currentLine);
-                            currentLine = words[i];
-                        }
+                        if (currentLine.length + words[i].length + 1 <= max) { currentLine += " " + words[i]; } 
+                        else { lines.push(currentLine); currentLine = words[i]; }
                     }
-                    lines.push(currentLine);
-                    return lines;
+                    lines.push(currentLine); return lines;
                 };
 
                 new Chart(ctx, {
                     type: 'radar',
                     data: {
                         labels: [
-                            formatLabel('Backend (PHP, Python)', 16),
-                            formatLabel('Frontend & Web Apps', 16),
-                            formatLabel('Bases de Datos', 16),
-                            formatLabel('IA & Automatización', 16),
-                            formatLabel('Diseño UI/UX', 16),
-                            formatLabel('Lógica de Negocios', 16)
+                            formatLabel('Backend & Lógica', 16), formatLabel('Frontend & UI', 16),
+                            formatLabel('Bases de Datos', 16), formatLabel('Ingeniería IA', 16),
+                            formatLabel('Diseño de Producto', 16), formatLabel('Gestión de Proyectos', 16)
                         ],
                         datasets: [{
-                            label: 'Nivel de Competencia (%)',
                             data: [85, 80, 85, 90, 85, 80],
-                            backgroundColor: 'rgba(20, 184, 166, 0.2)', // Brand 500 alpha
-                            borderColor: 'rgba(20, 184, 166, 1)',
-                            pointBackgroundColor: 'rgba(139, 92, 246, 1)', // Accent Purple
-                            pointBorderColor: '#fff',
-                            pointHoverBackgroundColor: '#fff',
-                            pointHoverBorderColor: 'rgba(139, 92, 246, 1)',
-                            borderWidth: 2,
+                            backgroundColor: 'rgba(20, 184, 166, 0.25)', borderColor: 'rgba(20, 184, 166, 1)',
+                            pointBackgroundColor: 'rgba(139, 92, 246, 1)', pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff', pointHoverBorderColor: 'rgba(139, 92, 246, 1)',
+                            borderWidth: 2, pointRadius: 4, pointHoverRadius: 6
                         }]
                     },
                     options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
+                        responsive: true, maintainAspectRatio: false,
                         scales: {
                             r: {
-                                angleLines: { color: 'rgba(0, 0, 0, 0.05)' },
-                                grid: { color: 'rgba(0, 0, 0, 0.05)' },
-                                pointLabels: {
-                                    font: { family: "'Inter', sans-serif", size: 11, weight: '600' },
-                                    color: '#475569'
-                                },
-                                ticks: { display: false, min: 0, max: 100, stepSize: 20 }
+                                angleLines: { color: 'rgba(0, 0, 0, 0.08)' }, grid: { color: 'rgba(0, 0, 0, 0.08)' },
+                                pointLabels: { font: { family: "'Inter', sans-serif", size: 12, weight: '700' }, color: '#334155' },
+                                ticks: { display: false, min: 0, max: 100 }
                             }
                         },
                         plugins: {
                             legend: { display: false },
                             tooltip: {
-                                backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                                titleFont: { size: 13, family: "'Inter', sans-serif" },
-                                bodyFont: { size: 14, weight: 'bold' },
-                                padding: 12,
-                                cornerRadius: 8,
-                                displayColors: false,
-                                callbacks: { label: (ctx) => ctx.raw + '% de dominio' }
+                                backgroundColor: 'rgba(15, 23, 42, 0.95)', titleFont: { size: 14, family: "'Inter', sans-serif" },
+                                bodyFont: { size: 15, weight: 'bold' }, padding: 14, cornerRadius: 12, displayColors: false,
+                                callbacks: { label: (ctx) => ctx.raw + '% de nivel técnico' }
                             }
                         }
                     }
@@ -445,110 +501,83 @@
                 timelineList.innerHTML = '';
                 timelineData.forEach((item, index) => {
                     const btn = document.createElement('button');
-                    btn.className = `timeline-item w-full text-left p-4 rounded-xl border-l-4 border-transparent hover:bg-slate-50 transition-colors flex items-center gap-4 ${index === 0 ? 'active' : ''}`;
+                    btn.className = `timeline-item w-full text-left p-4 rounded-2xl border border-transparent hover:bg-white/60 hover:shadow-sm flex items-center gap-4 ${index === 0 ? 'active border-brand-200 shadow-md' : ''}`;
                     btn.dataset.id = item.id;
-                    
                     btn.innerHTML = `
-                        <div class="text-2xl">${item.icon}</div>
+                        <div class="text-3xl bg-white w-12 h-12 flex items-center justify-center rounded-xl shadow-sm">${item.icon}</div>
                         <div>
-                            <div class="font-bold text-slate-800">${item.title}</div>
-                            <div class="text-xs text-slate-500">${item.period} &bull; ${item.type}</div>
+                            <div class="font-bold text-slate-800 text-lg">${item.title}</div>
+                            <div class="text-xs font-semibold text-brand-600 mt-1 uppercase tracking-wider">${item.period}</div>
                         </div>
                     `;
 
                     btn.addEventListener('click', () => {
-                        document.querySelectorAll('.timeline-item').forEach(el => el.classList.remove('active', 'bg-f0fdfa', 'border-brand-500'));
-                        btn.classList.add('active');
+                        document.querySelectorAll('.timeline-item').forEach(el => el.classList.remove('active', 'border-brand-200', 'shadow-md', 'bg-f0fdfa'));
+                        btn.classList.add('active', 'border-brand-200', 'shadow-md');
                         showTimelineDetail(item, timelineDetails);
                     });
-
                     timelineList.appendChild(btn);
                 });
                 showTimelineDetail(timelineData[0], timelineDetails);
             };
 
             const showTimelineDetail = (item, container) => {
-                const tagsHtml = item.tags.map(tag => `<span class="px-2 py-1 bg-white border border-slate-200 text-slate-600 text-[10px] uppercase font-bold tracking-wider rounded-md">${tag}</span>`).join('');
-                container.innerHTML = `
-                    <div class="animate-[fadeIn_0.3s_ease-out]">
-                        <div class="inline-flex items-center px-2 py-1 rounded bg-slate-200 text-slate-700 text-xs font-bold mb-3 uppercase tracking-wider">
-                            ${item.type}
+                const tagsHtml = item.tags.map(tag => `<span class="px-3 py-1 bg-white shadow-sm border border-slate-100 text-slate-700 text-[11px] uppercase font-bold tracking-widest rounded-full">${tag}</span>`).join('');
+                
+                // Animación simple al cambiar el contenido
+                container.style.opacity = '0';
+                setTimeout(() => {
+                    container.innerHTML = `
+                        <div class="absolute -right-10 -top-10 text-9xl opacity-5 pointer-events-none">${item.icon}</div>
+                        <div class="relative z-10">
+                            <div class="inline-flex items-center px-3 py-1 rounded-full bg-slate-800 text-white text-[10px] font-bold mb-4 uppercase tracking-widest">
+                                ${item.type}
+                            </div>
+                            <h4 class="text-2xl font-extrabold text-slate-900 mb-2 leading-tight">${item.title}</h4>
+                            <div class="w-12 h-1 bg-brand-500 rounded-full mb-6"></div>
+                            <p class="text-slate-600 text-base leading-relaxed mb-8 font-medium">
+                                ${item.details}
+                            </p>
+                            <div class="flex flex-wrap gap-2 mt-auto">
+                                ${tagsHtml}
+                            </div>
                         </div>
-                        <h4 class="text-xl font-bold text-slate-900 mb-1">${item.title}</h4>
-                        <p class="text-sm font-semibold text-brand-600 mb-4">${item.period}</p>
-                        <p class="text-slate-600 text-sm leading-relaxed mb-6">
-                            ${item.details}
-                        </p>
-                        <div class="flex flex-wrap gap-2">
-                            ${tagsHtml}
-                        </div>
-                    </div>
-                `;
+                    `;
+                    container.style.opacity = '1';
+                    container.style.transition = 'opacity 0.4s ease';
+                }, 150);
             };
 
 
             // --- 4. PORTFOLIO & MODAL LOGIC ---
             const portfolioGrid = document.getElementById('portfolio-grid');
             const filterBtns = document.querySelectorAll('.filter-btn');
-            
-            // Modal Elements
             const modal = document.getElementById('project-modal');
             const closeModalBtn = document.getElementById('close-modal');
-            const mTitle = document.getElementById('modal-title');
-            const mIcon = document.getElementById('modal-icon');
-            const mTags = document.getElementById('modal-tags');
-            const mDesc = document.getElementById('modal-description');
-            const mFeatures = document.getElementById('modal-features');
-            const mDemoBtn = document.getElementById('modal-demo-link');
-            const mRepoBtn = document.getElementById('modal-repo-link');
-            
-            // Code Preview Elements
-            const mCodeSection = document.getElementById('modal-code-section');
-            const mCodeExplanation = document.getElementById('modal-code-explanation');
-            const mCodeBlock = document.getElementById('modal-code-block');
 
             const openModal = (projectId) => {
                 const project = portfolioData.find(p => p.id === projectId);
                 if (!project) return;
 
-                // Populate Data
-                mTitle.textContent = project.title;
-                mIcon.textContent = project.icon;
-                mDesc.textContent = project.longDesc;
-                
-                mTags.innerHTML = project.tech.map(t => 
-                    `<span class="px-3 py-1 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg border border-slate-200">${t}</span>`
-                ).join('');
+                document.getElementById('modal-title').textContent = project.title;
+                document.getElementById('modal-icon').textContent = project.icon;
+                document.getElementById('modal-description').textContent = project.longDesc;
+                document.getElementById('modal-tags').innerHTML = project.tech.map(t => `<span class="px-3 py-1 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg border border-slate-200">${t}</span>`).join('');
+                document.getElementById('modal-features').innerHTML = project.features.map(f => `<li class="flex items-start gap-2"><span class="text-brand-500 font-bold">✓</span> <span>${f}</span></li>`).join('');
 
-                mFeatures.innerHTML = project.features.map(f => 
-                    `<li>${f}</li>`
-                ).join('');
-
-                // Check and show CODE PREVIEW
+                const codeSec = document.getElementById('modal-code-section');
                 if (project.codePreview) {
-                    mCodeExplanation.textContent = project.codePreview.explanation;
-                    mCodeBlock.textContent = project.codePreview.code;
-                    mCodeSection.classList.remove('hidden');
-                } else {
-                    mCodeSection.classList.add('hidden');
-                }
+                    document.getElementById('modal-code-explanation').textContent = project.codePreview.explanation;
+                    document.getElementById('modal-code-block').textContent = project.codePreview.code;
+                    codeSec.classList.remove('hidden');
+                } else { codeSec.classList.add('hidden'); }
 
-                // Manage Links (Hide if empty/hash)
-                if (project.demoLink && project.demoLink !== '' && project.demoLink !== '#') {
-                    mDemoBtn.href = project.demoLink;
-                    mDemoBtn.classList.remove('hidden');
-                } else {
-                    mDemoBtn.classList.add('hidden');
-                }
+                const demoBtn = document.getElementById('modal-demo-link');
+                const repoBtn = document.getElementById('modal-repo-link');
+                
+                if (project.demoLink && project.demoLink !== '#') { demoBtn.href = project.demoLink; demoBtn.classList.remove('hidden'); } else { demoBtn.classList.add('hidden'); }
+                if (project.repoLink && project.repoLink !== '#') { repoBtn.href = project.repoLink; repoBtn.classList.remove('hidden'); } else { repoBtn.classList.add('hidden'); }
 
-                if (project.repoLink && project.repoLink !== '' && project.repoLink !== '#') {
-                    mRepoBtn.href = project.repoLink;
-                    mRepoBtn.classList.remove('hidden');
-                } else {
-                    mRepoBtn.classList.add('hidden');
-                }
-
-                // Show Modal
                 modal.classList.remove('hidden');
                 setTimeout(() => modal.classList.add('visible'), 10);
                 document.body.style.overflow = 'hidden'; 
@@ -556,54 +585,44 @@
 
             const closeModal = () => {
                 modal.classList.remove('visible');
-                setTimeout(() => {
-                    modal.classList.add('hidden');
-                    document.body.style.overflow = 'auto'; 
-                }, 300); 
+                setTimeout(() => { modal.classList.add('hidden'); document.body.style.overflow = 'auto'; }, 400); 
             };
 
             closeModalBtn.addEventListener('click', closeModal);
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) closeModal(); 
-            });
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && modal.classList.contains('visible')) closeModal();
-            });
+            modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
 
 
             const renderPortfolio = (filterCategory = 'all') => {
                 portfolioGrid.innerHTML = '';
-                
-                const filteredData = filterCategory === 'all' 
-                    ? portfolioData 
-                    : portfolioData.filter(item => item.category === filterCategory);
+                const filteredData = filterCategory === 'all' ? portfolioData : portfolioData.filter(item => item.category === filterCategory);
 
                 if (filteredData.length === 0) {
-                    portfolioGrid.innerHTML = `<div class="col-span-full text-center text-slate-500 py-12 bg-slate-50 rounded-2xl border border-dashed border-slate-300">Aún no he subido proyectos en esta categoría. ¡Pronto habrá novedades!</div>`;
+                    portfolioGrid.innerHTML = `<div class="col-span-full text-center text-slate-500 py-16 bg-white/50 rounded-3xl border border-dashed border-slate-300 font-medium">Aún no he subido proyectos en esta categoría. ¡Pronto habrá novedades!</div>`;
                     return;
                 }
 
-                filteredData.forEach(project => {
-                    const techHtml = project.tech.slice(0,3).map(t => `<span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold rounded">${t}</span>`).join('');
-                    const extraTech = project.tech.length > 3 ? `<span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold rounded">+${project.tech.length - 3}</span>` : '';
-
+                filteredData.forEach((project, i) => {
+                    const techHtml = project.tech.slice(0,3).map(t => `<span class="px-2 py-1 bg-slate-100/80 text-slate-600 text-[10px] font-bold uppercase tracking-wider rounded-md">${t}</span>`).join('');
                     const card = document.createElement('div');
-                    card.className = 'interactive-card bg-white border border-slate-200 rounded-2xl p-6 flex flex-col h-full animate-[fadeIn_0.4s_ease-out] relative group';
+                    
+                    // Cascade animation effect
+                    card.style.animationDelay = `${i * 0.1}s`;
+                    card.className = 'interactive-card bg-white/80 backdrop-blur-sm border border-white rounded-[2rem] p-8 flex flex-col h-full shadow-lg relative group reveal active';
+                    
                     card.innerHTML = `
-                        <div class="absolute inset-0 bg-brand-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
-                        <div class="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-2xl mb-4 border border-slate-100 shadow-sm">
+                        <div class="w-14 h-14 bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl flex items-center justify-center text-3xl mb-6 border border-slate-200/60 shadow-inner group-hover:scale-110 transition-transform duration-300">
                             ${project.icon}
                         </div>
-                        <h4 class="text-lg font-bold text-slate-900 mb-2">${project.title}</h4>
-                        <p class="text-sm text-slate-600 mb-6 flex-grow">${project.shortDesc}</p>
-                        <div class="flex flex-wrap gap-1.5 mt-auto mb-4">
-                            ${techHtml} ${extraTech}
+                        <h4 class="text-xl font-extrabold text-slate-900 mb-3 group-hover:text-brand-600 transition-colors">${project.title}</h4>
+                        <p class="text-sm text-slate-600 mb-8 flex-grow leading-relaxed">${project.shortDesc}</p>
+                        <div class="flex flex-wrap gap-2 mt-auto mb-6">
+                            ${techHtml}
                         </div>
-                        <div class="mt-auto border-t border-slate-100 pt-4 text-brand-600 text-sm font-bold flex items-center justify-between group-hover:text-brand-700">
-                            Ver detalles <span>→</span>
+                        <div class="mt-auto border-t border-slate-100 pt-5 text-brand-600 text-sm font-bold flex items-center justify-between group-hover:text-brand-700">
+                            Explorar Proyecto <span class="group-hover:translate-x-2 transition-transform duration-300">→</span>
                         </div>
                     `;
-                    
                     card.addEventListener('click', () => openModal(project.id));
                     portfolioGrid.appendChild(card);
                 });
@@ -611,23 +630,12 @@
 
             filterBtns.forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    filterBtns.forEach(b => {
-                        b.classList.remove('active', 'bg-slate-900', 'text-white');
-                        b.classList.add('bg-slate-100', 'text-slate-600');
-                    });
+                    filterBtns.forEach(b => b.classList.remove('active', 'bg-slate-900', 'text-white'));
                     const target = e.target;
-                    target.classList.remove('bg-slate-100', 'text-slate-600');
                     target.classList.add('active', 'bg-slate-900', 'text-white');
                     renderPortfolio(target.dataset.filter);
                 });
             });
-
-            tailwind.config.theme.extend.keyframes = {
-                fadeIn: {
-                    '0%': { opacity: '0', transform: 'translateY(15px)' },
-                    '100%': { opacity: '1', transform: 'translateY(0)' },
-                }
-            };
 
             // --- 5. INITIALIZE APP ---
             initChart();
